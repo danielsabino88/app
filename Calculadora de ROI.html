@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de ROI - Gestão de Estoque</title>
+    <style>
+        :root {
+            --primary: #0f172a;    /* Escuro corporativo */
+            --secondary: #3b82f6;  /* Azul ação */
+            --accent: #10b981;     /* Verde ROI/Lucro */
+            --bg-page: #f1f5f9;
+            --bg-card: #ffffff;
+            --border: #e2e8f0;
+            --text-main: #334155;
+            --text-muted: #64748b;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: var(--bg-page);
+            color: var(--text-main);
+            margin: 0;
+            padding: 30px 15px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .container {
+            background-color: var(--bg-card);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1);
+            max-width: 1000px;
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .header {
+            background-color: var(--primary);
+            color: white;
+            padding: 25px 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            margin: 0 0 10px 0;
+            font-size: 26px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #94a3b8;
+            font-size: 15px;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0;
+        }
+
+        /* Seção de Entradas */
+        .input-section {
+            padding: 30px;
+            border-right: 1px solid var(--border);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--primary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+            color: var(--text-main);
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .prefix, .suffix {
+            position: absolute;
+            color: var(--text-muted);
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .prefix { left: 12px; }
+        .suffix { right: 12px; }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            font-size: 15px;
+            color: var(--text-main);
+            box-sizing: border-box;
+            transition: border-color 0.2s;
+        }
+
+        input[type="number"]:focus {
+            outline: none;
+            border-color: var(--secondary);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .has-prefix { padding-left: 35px !important; }
+        .has-suffix { padding-right: 30px !important; }
+
+        .help-text {
+            font-size: 12px;
+            color: var(--text-muted);
+            margin-top: 4px;
+            display: block;
+        }
+
+        /* Seção de Resultados */
+        .results-section {
+            padding: 30px;
+            background-color: #f8fafc;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .roi-card {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 10px;
+            padding: 20px;
+            color: white;
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 6px -1px rgba(16, 185, 129, 0.3);
+        }
+
+        .roi-card h3 {
+            margin: 0 0 5px 0;
+            font-size: 16px;
+            font-weight: 500;
+            opacity: 0.9;
+        }
+
+        .roi-value {
+            font-size: 42px;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+
+        .metric-box {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            text-align: center;
+        }
+
+        .metric-label {
+            font-size: 12px;
+            color: var(--text-muted);
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .metric-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+
+        .metric-value.positive { color: var(--accent); }
+        .metric-value.negative { color: #ef4444; }
+
+        .pitch-box {
+            background: white;
+            border-left: 4px solid var(--secondary);
+            padding: 20px;
+            border-radius: 4px 8px 8px 4px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            flex-grow: 1;
+        }
+
+        .pitch-box h4 {
+            margin: 0 0 10px 0;
+            color: var(--secondary);
+            font-size: 16px;
+        }
+
+        .pitch-text {
+            font-size: 14px;
+            line-height: 1.6;
+            margin: 0;
+            color: #475569;
+        }
+
+        .pitch-highlight {
+            font-weight: 700;
+            color: var(--primary);
+            background-color: #f1f5f9;
+            padding: 2px 4px;
+            border-radius: 3px;
+        }
+
+        /* Divider para separar os inputs em sessões */
+        .divider {
+            height: 1px;
+            background-color: var(--border);
+            margin: 25px 0;
+        }
+
+        @media (max-width: 768px) {
+            .main-content { grid-template-columns: 1fr; }
+            .input-section { border-right: none; border-bottom: 1px solid var(--border); }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="header">
+        <h1>Simulador de Retorno sobre Investimento (ROI)</h1>
+        <p>Descubra o impacto financeiro de eliminar rupturas e otimizar o PME</p>
+    </div>
+
+    <div class="main-content">
+        <!-- Lado Esquerdo: Entradas -->
+        <div class="input-section">
+            
+            <div class="section-title">📊 Dados do Cliente</div>
+            
+            <div class="input-group">
+                <label>Faturamento Mensal Bruto</label>
+                <div class="input-wrapper">
+                    <span class="prefix">R$</span>
+                    <input type="number" id="faturamento" class="has-prefix" value="1000000" oninput="calcularROI()">
+                </div>
+            </div>
+
+            <div class="input-group">
+                <label>Valor Total do Estoque Atual</label>
+                <div class="input-wrapper">
+                    <span class="prefix">R$</span>
+                    <input type="number" id="valor-estoque" class="has-prefix" value="300000" oninput="calcularROI()">
+                </div>
+                <span class="help-text">Capital imobilizado em mercadorias.</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section-title">🎯 Potencial de Melhoria</div>
+
+            <div class="input-group">
+                <label>Taxa de Ruptura Estimada</label>
+                <div class="input-wrapper">
+                    <input type="number" id="ruptura" class="has-suffix" value="5" oninput="calcularROI()">
+                    <span class="suffix">%</span>
+                </div>
+                <span class="help-text">Vendas perdidas por falta de produto (Média de mercado: 5% a 8%).</span>
+            </div>
+
+            <div class="input-group">
+                <label>Redução Desejada no Estoque (Otimização PME)</label>
+                <div class="input-wrapper">
+                    <input type="number" id="reducao-estoque" class="has-suffix" value="15" oninput="calcularROI()">
+                    <span class="suffix">%</span>
+                </div>
+                <span class="help-text">Estoque excedente que será liberado (Média da ferramenta: 10% a 20%).</span>
+            </div>
+
+            <div class="divider"></div>
+
+            <div class="section-title">💻 Investimento na Ferramenta</div>
+            <div class="input-group" style="margin-bottom: 0;">
+                <label>Mensalidade do Software</label>
+                <div class="input-wrapper">
+                    <span class="prefix">R$</span>
+                    <input type="number" id="investimento" class="has-prefix" value="4500" oninput="calcularROI()">
+                </div>
+            </div>
+        </div>
+
+        <!-- Lado Direito: Resultados -->
+        <div class="results-section">
+            
+            <div class="roi-card">
+                <h3>Retorno sobre o Investimento (ROI)</h3>
+                <div class="roi-value" id="display-roi">0%</div>
+                <div style="font-size: 13px; margin-top: 5px; opacity: 0.8;">Para cada R$ 1 investido, retornam R$ <span id="display-multiplicador">0</span></div>
+            </div>
+
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-label">Recuperação de Vendas (Mês)</div>
+                    <div class="metric-value positive" id="display-recuperacao">+ R$ 0</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Fim da ruptura</div>
+                </div>
+                
+                <div class="metric-box">
+                    <div class="metric-label">Caixa Liberado (Único)</div>
+                    <div class="metric-value positive" id="display-caixa">+ R$ 0</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Otimização de PME</div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-label">Custo Oportunidade (Mês)</div>
+                    <div class="metric-value positive" id="display-juros">+ R$ 0</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Rend. CDI do Caixa</div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-label">Investimento Mensal</div>
+                    <div class="metric-value negative" id="display-investimento">- R$ 0</div>
+                    <div style="font-size: 11px; color: #64748b; margin-top: 4px;">Mensalidade</div>
+                </div>
+            </div>
+
+            <div class="pitch-box">
+                <h4>🎙️ O Argumento de Venda</h4>
+                <p class="pitch-text" id="pitch-text">
+                    Preencha os dados ao lado para gerar o argumento.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script>
+    // Função auxiliar para formatar moeda (BRL)
+    const formatarMoeda = (valor) => {
+        return valor.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    };
+
+    function calcularROI() {
+        // 1. Capturar Valores
+        const faturamento = parseFloat(document.getElementById('faturamento').value) || 0;
+        const valorEstoque = parseFloat(document.getElementById('valor-estoque').value) || 0;
+        const taxaRuptura = parseFloat(document.getElementById('ruptura').value) || 0;
+        const metaReducaoEstoque = parseFloat(document.getElementById('reducao-estoque').value) || 0;
+        const investimentoMensal = parseFloat(document.getElementById('investimento').value) || 0;
+
+        // 2. Cálculos Financeiros
+        
+        // A. Ganho com Ruptura (Venda que não era feita e passa a ser feita)
+        // Se a ruptura era 5%, ele perdia 5% do faturamento. 
+        // Vamos ser conservadores e assumir que a ferramenta resolve 80% da ruptura.
+        const ganhoRupturaMensal = faturamento * (taxaRuptura / 100) * 0.80;
+
+        // B. Ganho com Otimização de Estoque (Dinheiro que sai da prateleira e vai pro banco)
+        const caixaLiberado = valorEstoque * (metaReducaoEstoque / 100);
+        
+        // C. Custo de Oportunidade (O que esse caixa liberado renderia no banco a ~1% ao mês - CDI)
+        const taxaSelicMes = 0.0085; // 0.85% ao mês (estimativa conservadora de CDI)
+        const rendimentoCaixaLiberadoMensal = caixaLiberado * taxaSelicMes;
+
+        // D. Benefício Total Mensal (Recuperação Vendas + Rendimento do Caixa)
+        const beneficioTotalMensal = ganhoRupturaMensal + rendimentoCaixaLiberadoMensal;
+
+        // E. Cálculo do ROI Mensal = ((Benefício - Custo) / Custo) * 100
+        let roi = 0;
+        let multiplicador = 0;
+        if (investimentoMensal > 0) {
+            roi = ((beneficioTotalMensal - investimentoMensal) / investimentoMensal) * 100;
+            multiplicador = beneficioTotalMensal / investimentoMensal;
+        }
+
+        // 3. Atualizar a Interface
+        document.getElementById('display-roi').innerText = roi.toFixed(0) + '%';
+        document.getElementById('display-multiplicador').innerText = multiplicador.toFixed(1);
+        
+        document.getElementById('display-recuperacao').innerText = '+ R$ ' + formatarMoeda(ganhoRupturaMensal);
+        document.getElementById('display-caixa').innerText = '+ R$ ' + formatarMoeda(caixaLiberado);
+        document.getElementById('display-juros').innerText = '+ R$ ' + formatarMoeda(rendimentoCaixaLiberadoMensal);
+        document.getElementById('display-investimento').innerText = '- R$ ' + formatarMoeda(investimentoMensal);
+
+        // 4. Montar o Pitch Dinâmico
+        const pitchElement = document.getElementById('pitch-text');
+        
+        if (beneficioTotalMensal > investimentoMensal) {
+            pitchElement.innerHTML = `
+                O investimento na nossa ferramenta de <strong>R$ ${formatarMoeda(investimentoMensal)}</strong> não é uma despesa, é uma alavanca de geração de caixa. <br><br>
+                Ao reduzir o PME e otimizar seu estoque, nós vamos injetar <span class="pitch-highlight">R$ ${formatarMoeda(caixaLiberado)}</span> em dinheiro vivo direto na sua conta. Só o rendimento desse dinheiro parado no banco já paga parte da ferramenta.<br><br>
+                Mas o impacto real vem das vendas: evitando rupturas, você deixa de perder vendas e traz <span class="pitch-highlight">R$ ${formatarMoeda(ganhoRupturaMensal)}</span> a mais de faturamento todo mês. A ferramenta não se paga, ela <strong>gera lucro no primeiro mês</strong>.
+            `;
+        } else if (investimentoMensal === 0) {
+             pitchElement.innerHTML = "Insira o valor do investimento para calcularmos o ROI.";
+        } else {
+             pitchElement.innerHTML = `
+                Mesmo em um cenário conservador, a organização do seu estoque traz ganhos de eficiência operacionais e de tempo que superam o valor da mensalidade, blindando sua operação contra excessos.
+            `;
+        }
+
+        // Mudança visual da cor do ROI se for negativo
+        const roiCard = document.querySelector('.roi-card');
+        if (roi < 0) {
+            roiCard.style.background = 'linear-gradient(135deg, #ef4444 0%, #b91c1c 100%)';
+            roiCard.style.boxShadow = '0 4px 6px -1px rgba(239, 68, 68, 0.3)';
+        } else {
+            roiCard.style.background = 'linear-gradient(135deg, #10b981 0%, #059669 100%)';
+            roiCard.style.boxShadow = '0 4px 6px -1px rgba(16, 185, 129, 0.3)';
+        }
+    }
+
+    // Inicializar na carga
+    window.onload = calcularROI;
+</script>
+
+</body>
+</html>
